@@ -6,6 +6,7 @@ const LoginController = require("../controllers/authController");
 
 const QuestionController = require("../controllers/questionController");
 const optionController = require("../controllers/optionsController");
+const answerController = require("../controllers/answerController");
 
 router.post("/createUser", UsersController.createUser);
 router.post("/login", LoginController.handleLogin);
@@ -21,5 +22,6 @@ router.post("/createQuestion", verifyJWT, QuestionController.createQuestion);
 router.post("/createOption", verifyJWT, optionController);
 router.put("/updateQuestion/:id", verifyJWT, QuestionController.updateQuestion);
 router.delete("/deleteQuestion/:id", verifyJWT, QuestionController.deleteQuestion);
+router.post("/submitAnswer", verifyJWT, answerController.answerAQuestion);
 
 module.exports = router;

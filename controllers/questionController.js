@@ -3,7 +3,6 @@ const optionModal = require("../models/OptionModel");
 
 const createQuestion = async (req, res) => {
     const { desc } = req.body;
-    console.log(req.body, "body");
 
     if (!desc) {
         return res.status(400).json({ message: "Required fields cannot be empty" });
@@ -13,7 +12,6 @@ const createQuestion = async (req, res) => {
         const question = await questionModal.create({
             desc: desc,
         });
-        console.log(question, "createdQuestion");
         res.status(201).json(question);
     } catch (error) {
         res.status(500).json({ message: error });
