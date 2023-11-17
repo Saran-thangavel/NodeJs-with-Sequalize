@@ -47,4 +47,83 @@ const answerAQuestion = async (req, res) => {
     }
 };
 
-module.exports = { answerAQuestion };
+const answerAllQuestions = async (req, res) => {
+    const answers = req.body;
+
+    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+        return res.status(400).json({ message: "Required fields cannot be empty" });
+    }
+
+    try {
+        const response = getTokenInfo(req, res);
+        const userInfo = await userInfoModal.findOne({ where: { email: response.email } });
+
+        const questionIds = answers.map((answer) => {
+            return answer.ques_id;
+        });
+
+        const questions = await questionModal.findAll({ where: { id: questionIds } });
+        if (questions.length !== questionIds.length) {
+            return res.status(400).json({ message: "One or more questions not found." });
+        }
+
+        const existingAnswers = await answersModal.findAll({ where: { user_id: response.userId, ques_id: questionIds } });
+        if (existingAnswers.length > 0) {
+            return res.status(400).json({ message: "You have already answered one or more questions." });
+        }
+
+        const answersData = answers.map((answer) => {
+            return { user_id: response.userId, ques_id: answer.ques_id, chosen_answer: answer.chosen_answer };
+        });
+
+        await answersModal.bulkCreate(answersData);
+        res.status(200).json({ message: `Dear ${userInfo.firstname} ${userInfo.lastname}, your answers have been successfully submitted` });
+    } catch (error) {
+        return res.status(500).json({ message: error });
+    }
+};
+
+const updateAnswers = async (req, res) => {
+    const answers = req.body;
+
+    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+        return res.status(400).json({ message: "Required fields cannot be empty" });
+    }
+
+    try {
+        const response = getTokenInfo(req, res);
+        const userInfo = await userInfoModal.findOne({ where: { email: response.email } });
+
+        const questionIds = answers.map((answer) => {
+            return answer.ques_id;
+        });
+
+        const questions = await questionModal.findAll({ where: { id: questionIds } });
+        if (questions.length !== questionIds.length) {
+            return res.status(400).json({ message: "One or more questions not found." });
+        }
+
+        const existingAnswers = await answersModal.findAll({ where: { user_id: response.userId, ques_id: questionIds } });
+        if (existingAnswers.length > 0) {
+            // Use update method to update existing records
+            for (const answer of answers) {
+                await answersModal.update({ chosen_answer: answer.chosen_answer }, { where: { user_id: response.userId, ques_id: answer.ques_id } });
+            }
+            return res.status(200).json({ message: `Dear ${userInfo.firstname} ${userInfo.lastname}, your answers have been successfully updated` });
+        }
+
+        await answersModal.bulkCreate(
+            answers.map((answer) => ({
+                user_id: response.userId,
+                ques_id: answer.ques_id,
+                chosen_answer: answer.chosen_answer,
+            }))
+        );
+
+        res.status(200).json({ message: `Dear ${userInfo.firstname} ${userInfo.lastname}, your answers have been successfully submitted` });
+    } catch (error) {
+        return res.status(500).json({ message: error });
+    }
+};
+
+module.exports = { answerAQuestion, answerAllQuestions, updateAnswers };
