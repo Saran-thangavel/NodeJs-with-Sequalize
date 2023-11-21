@@ -1,5 +1,7 @@
+const { sendEmail } = require("../email");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const { successResponse, errorResponse } = require("../utils/responseHandler");
 
 const createUser = async (req, res) => {
     const { firstname, lastname, email, phonenumber, password } = req.body;
@@ -23,6 +25,11 @@ const createUser = async (req, res) => {
         });
         console.log(user);
         res.status(201).json(user);
+
+        const toEmail = email;
+        const subject = "Hi there!";
+        const text = "Testing email through register user api";
+        sendEmail(toEmail, subject, text);
     } catch (error) {
         console.log(error);
         res.status(500).json({ Message: error });
@@ -35,10 +42,12 @@ const getAllUsers = async (req, res) => {
             attributes: { exclude: ["password"] },
         });
         console.log("all done", allUsers);
-        res.status(200).json(allUsers);
+        // res.status(200).json(allUsers);
+        successResponse(res, 200, allUsers);
     } catch (error) {
         console.log(error);
-        res.status(500).json({ Message: error });
+        // res.status(500).json({ Message: error });
+        errorResponse(res, 500, error);
     }
 };
 
@@ -47,10 +56,12 @@ const getUser = async (req, res) => {
     console.log(req, "userId");
     try {
         const getUser = await User.findOne({ where: { id: id }, attributes: { exclude: ["password"] } });
-        res.status(200).json(getUser);
+        // res.status(200).json(getUser);
+        successResponse(res, 200, getUser);
     } catch (error) {
         console.log(error);
-        res.status(500).json({ Message: error });
+        // res.status(500).json({ Message: error });
+        errorResponse(res, 500, error);
     }
 };
 
