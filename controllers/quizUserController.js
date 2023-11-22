@@ -1,4 +1,4 @@
-const User = require("../models/Quiz");
+const User = require("../models/User");
 const bcrypt = require("bcrypt");
 
 const createQuizUser = async (req, res) => {

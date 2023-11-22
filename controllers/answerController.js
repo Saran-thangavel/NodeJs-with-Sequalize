@@ -13,6 +13,7 @@ const answerAQuestion = async (req, res) => {
 
     try {
         const response = getTokenInfo(req, res);
+
         const userInfo = await userInfoModal.findOne({ where: { email: response.email } });
         const question = await questionModal.findOne({ where: { id: ques_id } });
         if (!question) {
@@ -35,6 +36,7 @@ const answerAQuestion = async (req, res) => {
         if (chosen_answer !== option.id) {
             return res.status(400).json({ message: "Not a valid option id" });
         }
+        console.log(response.userId, "responsse");
 
         await answersModal.create({
             user_id: response.userId,
